@@ -1,11 +1,14 @@
+package datagramsocket4;
+
 import CMPC3M06.AudioRecorder;
+import uk.ac.uea.cmp.voip.DatagramSocket4;
 
 import javax.sound.sampled.LineUnavailableException;
 import java.net.*;
 import java.nio.ByteBuffer;
 
-public class Sender {
-    static DatagramSocket sending_socket;
+public class Sender4 {
+    static DatagramSocket4 sending_socket;
     public static void main(String[] args) throws Exception{
         {
             int PORT = 55555;
@@ -19,7 +22,7 @@ public class Sender {
             }
 
             try {
-                sending_socket = new DatagramSocket();
+                sending_socket = new DatagramSocket4();
             } catch (SocketException e) {
                 System.out.println("ERROR: AudioSender: Could not open UDP socket to send from.");
                 e.printStackTrace();

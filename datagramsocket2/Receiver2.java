@@ -1,18 +1,20 @@
+package datagramsocket2;
+
 import CMPC3M06.AudioPlayer;
+import uk.ac.uea.cmp.voip.DatagramSocket2;
 
 import javax.sound.sampled.LineUnavailableException;
 import java.net.DatagramPacket;
-import java.net.DatagramSocket;
 import java.net.SocketException;
 import java.nio.ByteBuffer;
 
-public class Receiver {
-    static DatagramSocket receiving_socket;
+public class Receiver2 {
+    static DatagramSocket2 receiving_socket;
     public static void main(String[] args) {
         {
             int PORT = 55555;
             try {
-                receiving_socket = new DatagramSocket(PORT);
+                receiving_socket = new DatagramSocket2(PORT);
             } catch (SocketException e){
                 System.out.println("ERROR: AudioReceiver: Could not open UDP socket to receive from.");
                 e.printStackTrace();
