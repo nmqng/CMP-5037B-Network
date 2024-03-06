@@ -35,6 +35,7 @@ public class Receiver {
                     receiving_socket.receive(packet);
                     // decrypt data from here
                     ByteBuffer unwrapDecrypt = ByteBuffer.allocate(packet.getLength()); // allocate block length
+//                    short authen
                     ByteBuffer cipherText = ByteBuffer.wrap(packet.getData()); // wrap the encryptedBlock
                     short authenticationKey = cipherText.getShort();
                     if (authenticationKey == 10){
@@ -46,6 +47,7 @@ public class Receiver {
                         byte[] decryptedBlock = unwrapDecrypt.array();
                         player.playBlock(decryptedBlock);
                     } else {
+                        System.out.println(authenticationKey);
                         System.out.println("Authentication key not match");
                     }
                 } catch (Exception e){

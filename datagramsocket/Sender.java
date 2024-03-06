@@ -12,7 +12,7 @@ public class Sender {
             int PORT = 55555;
             InetAddress clientIP = null;
             try {
-                clientIP = InetAddress.getByName("localhost");
+                clientIP = InetAddress.getByName("139.222.99.214");
             } catch (UnknownHostException e) {
                 System.out.println("ERROR: AudioSender: Could not find client IP");
                 e.printStackTrace();
@@ -55,8 +55,8 @@ public class Sender {
                         // This line authentication (payload with header) VoIPpacket
                         ByteBuffer VoIPpacket = ByteBuffer.allocate(encryptedBlock.length + 2);
                         // put the block into the VoIPpacket
-                        VoIPpacket.put(encryptedBlock);
                         VoIPpacket.putShort(authenticationKey);
+                        VoIPpacket.put(encryptedBlock);
                         DatagramPacket packet = new DatagramPacket(VoIPpacket.array(), VoIPpacket.array().length, clientIP, PORT);
                         sending_socket.send(packet);
                     }
