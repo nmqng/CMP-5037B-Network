@@ -32,7 +32,7 @@ public class Sender4 {
 
         //Initialise AudioPlayer and AudioRecorder objects
         AudioRecorder recorder = new AudioRecorder();
-        int recordTime = 10;
+        int recordTime = Integer.MAX_VALUE;
 
         // Main loop
         boolean running = true;
