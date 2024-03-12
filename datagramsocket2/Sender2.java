@@ -1,13 +1,13 @@
 package datagramsocket2;
-import java.util.Vector;
+import java.nio.ByteBuffer;
 import java.net.*;
 
-//Uncomment the following if using JAR package:
 import CMPC3M06.AudioRecorder;
 import uk.ac.uea.cmp.voip.DatagramSocket2;
 
 public class Sender2 {
     static DatagramSocket2 sending_socket;
+    static byte[] lastSentPacket = new byte[516]; // Store the last sent packet
 
     public static void main(String[] args) throws Exception{
         int PORT = 55555;
@@ -28,21 +28,28 @@ public class Sender2 {
             System.exit(0);
         }
 
-        //Initialise AudioPlayer and AudioRecorder objects
         AudioRecorder recorder = new AudioRecorder();
         int recordTime = Integer.MAX_VALUE;
+        // sequence number
+        int sequenceNumber = 0;
+        byte [] sequence_number_byte;
 
         // Main loop
         boolean running = true;
         while (running){
             try {
                 System.out.println("Recording Audio...");
-                byte[] buffer = new byte[512];
+                byte[] buffer = new byte[516];
                 DatagramPacket packet = new DatagramPacket(buffer, buffer.length, clientIP, PORT);
                 for (int i = 0; i < Math.ceil(recordTime / 0.032); i++) {
                     byte[] block = recorder.getBlock();
-                    packet.setData(block);
+                    sequence_number_byte = ByteBuffer.allocate(4).putInt(sequenceNumber).array();
+                    System.arraycopy(block,0,buffer,0,block.length);
+                    System.arraycopy(sequence_number_byte,0,buffer,block.length, sequence_number_byte.length);
+                    packet.setData(buffer);
                     sending_socket.send(packet);
+                    sequenceNumber++;
+                    lastSentPacket = buffer; // Update the last sent packet
                 }
                 running = false;
             } catch (Exception e){
