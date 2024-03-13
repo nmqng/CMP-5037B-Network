@@ -2,6 +2,7 @@ package datagramsocket;
 
 import CMPC3M06.AudioRecorder;
 import java.net.*;
+import java.nio.ByteBuffer;
 
 public class Sender {
     static DatagramSocket sending_socket;
@@ -28,15 +29,15 @@ public class Sender {
         AudioRecorder recorder = new AudioRecorder();
         int recordTime = Integer.MAX_VALUE;
         int[] key = {2,0,3,1};
-//        short authKey = 10;
+        int authKey = 331;
+        int sharedKey = 402;
+        int encryptedAuthKey = authKey ^ sharedKey;
 
         // Main loop
         boolean running = true;
         while (running){
             try {
                 System.out.println("Recording Audio...");
-                byte[] buffer = new byte[512];
-                DatagramPacket packet = new DatagramPacket(buffer, buffer.length, clientIP, PORT);
                 for (int i = 0; i < Math.ceil(recordTime / 0.032); i++) {
                     byte[] block = recorder.getBlock();
                     byte[] encryptedBlock = new byte[block.length];
@@ -45,7 +46,11 @@ public class Sender {
                             encryptedBlock[j + k] = block[j + key[k]];
                         }
                     }
-                    packet.setData(encryptedBlock);
+
+                    ByteBuffer VoIPpacket = ByteBuffer.allocate(516);
+                    VoIPpacket.putInt(encryptedAuthKey);
+                    VoIPpacket.put(encryptedBlock);
+                    DatagramPacket packet = new DatagramPacket(VoIPpacket.array(), VoIPpacket.array().length, clientIP, PORT);
                     sending_socket.send(packet);
                 }
                 running = false;
