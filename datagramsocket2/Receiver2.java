@@ -33,7 +33,8 @@ public class Receiver2 {
 
                 if (receivedSequenceNumber == expectedSequenceNumber) {
 //                    System.out.println("Received packet with sequence number: " + receivedSequenceNumber);
-                    lastReceivedPacket = audio_data; // Update the last received packet
+                    // Update the last received packet
+                    lastReceivedPacket = audio_data;
                 } else {
                     // Report missing sequence numbers
 //                    System.out.println("Missing sequence number(s) from " + expectedSequenceNumber + " to " + (receivedSequenceNumber - 1));
@@ -41,11 +42,10 @@ public class Receiver2 {
                         player.playBlock(lastReceivedPacket); // Play the last received packet for each missing packet
                     }
                 }
-                // Extract audio data from packet
                 byte[] audioData = new byte[512];
                 wrappedBuffer.get(audioData);
 
-                player.playBlock(audioData); // Play the received audio block
+                player.playBlock(audioData);
                 expectedSequenceNumber = receivedSequenceNumber + 1;
             }
         } catch (Exception e) {

@@ -10,7 +10,7 @@ public class Sender {
         int PORT = 55555;
         InetAddress clientIP = null;
         try {
-            clientIP = InetAddress.getByName("localhost");
+            clientIP = InetAddress.getByName("localhost"); //139.222.202.6
         } catch (UnknownHostException e){
             System.out.println("ERROR: AudioSender: Could not find client IP");
             e.printStackTrace();
@@ -27,7 +27,8 @@ public class Sender {
 
         AudioRecorder recorder = new AudioRecorder();
         int recordTime = Integer.MAX_VALUE;
-        int[] key = {3, 1, 2, 0};
+        int[] key = {2,0,3,1};
+//        short authKey = 10;
 
         // Main loop
         boolean running = true;

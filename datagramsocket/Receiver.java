@@ -21,7 +21,7 @@ public class Receiver {
         DatagramPacket packet = new DatagramPacket(buffer, 0, buffer.length);
         AudioPlayer player = new AudioPlayer();
 
-        int[] key = {3, 1, 2, 0};
+        int[] key = {2,0,3,1};
         // Inverse permutation key
         int[] inverseKey = new int[key.length];
         for (int i = 0; i < key.length; i++) {

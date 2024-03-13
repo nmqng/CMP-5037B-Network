@@ -7,13 +7,13 @@ import uk.ac.uea.cmp.voip.DatagramSocket2;
 
 public class Sender2 {
     static DatagramSocket2 sending_socket;
-    static byte[] lastSentPacket = new byte[516]; // Store the last sent packet
+    static byte[] lastSentPacket = new byte[516];
 
     public static void main(String[] args) throws Exception{
         int PORT = 55555;
         InetAddress clientIP = null;
         try {
-            clientIP = InetAddress.getByName("localhost");
+            clientIP = InetAddress.getByName("139.222.202.6");
         } catch (UnknownHostException e){
             System.out.println("ERROR: AudioSender: Could not find client IP");
             e.printStackTrace();
@@ -30,7 +30,6 @@ public class Sender2 {
 
         AudioRecorder recorder = new AudioRecorder();
         int recordTime = Integer.MAX_VALUE;
-        // sequence number
         int sequenceNumber = 0;
         byte [] sequence_number_byte;
 
@@ -49,7 +48,8 @@ public class Sender2 {
                     packet.setData(buffer);
                     sending_socket.send(packet);
                     sequenceNumber++;
-                    lastSentPacket = buffer; // Update the last sent packet
+                    // Update the last sent packet
+                    lastSentPacket = buffer;
                 }
                 running = false;
             } catch (Exception e){
