@@ -13,7 +13,7 @@ public class Sender2 {
         int PORT = 55555;
         InetAddress clientIP = null;
         try {
-            clientIP = InetAddress.getByName("139.222.202.6");
+            clientIP = InetAddress.getByName("localhost");
         } catch (UnknownHostException e){
             System.out.println("ERROR: AudioSender: Could not find client IP");
             e.printStackTrace();

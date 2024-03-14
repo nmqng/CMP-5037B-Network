@@ -1,60 +1,76 @@
 package datagramsocket3;
 
-import java.net.*;
-import java.nio.ByteBuffer;
-import java.util.Arrays;
-
 import CMPC3M06.AudioPlayer;
 import uk.ac.uea.cmp.voip.DatagramSocket3;
 
+import java.net.DatagramPacket;
+import java.net.SocketException;
+import java.nio.ByteBuffer;
+import java.util.HashMap;
+import java.util.Map;
+
 public class Receiver3 {
     static DatagramSocket3 receiving_socket;
-    static byte[] lastReceivedPacket = new byte[512]; // Store the last received packet
-    static int TIMEOUT = 5000; // Timeout in milliseconds
-
-    public static void main(String[] args) {
-        int PORT = 55555;
+    public static void main (String[] args) throws Exception {
+        int PORT = 55550;
         try {
-            receiving_socket = new DatagramSocket3(PORT); // Initialize the DatagramSocket3 for receiving data
-            AudioPlayer player = new AudioPlayer(); // Initialize the audio player
-            int expectedSequenceNumber = 0; // Initialize the expected sequence number for packet ordering
-
-            // Main loop for receiving audio data
-            while (true) {
-                byte[] buffer = new byte[516]; // Create a buffer to hold received data
-                DatagramPacket packet = new DatagramPacket(buffer, buffer.length); // Create a DatagramPacket to receive data
-
-                // Set timeout for receiving socket to handle potential packet loss
-                receiving_socket.setSoTimeout(TIMEOUT);
-
-                try {
-                    receiving_socket.receive(packet); // Receive a packet
-                } catch (SocketTimeoutException e) {
-                    System.out.println("ERROR: Receiver: Timeout occurred while waiting for packet.");
-                    continue; // Continue waiting for the next packet on timeout
-                }
-
-                ByteBuffer wrappedBuffer = ByteBuffer.wrap(packet.getData()); // Wrap the received data in a ByteBuffer
-                byte[] audioData = new byte[512]; // Create a buffer to hold the audio data
-                byte[] sequenceNumberBytes = new byte[4]; // Create a buffer to hold the sequence number
-
-                wrappedBuffer.get(audioData); // Extract the audio data from the received buffer
-                wrappedBuffer.get(sequenceNumberBytes); // Extract the sequence number from the received buffer
-                int receivedSequenceNumber = ByteBuffer.wrap(sequenceNumberBytes).getInt(); // Convert the sequence number bytes to integer
-
-                if (receivedSequenceNumber == expectedSequenceNumber) { // Check if received packet is in order
-                    lastReceivedPacket = Arrays.copyOf(packet.getData(), packet.getLength()); // Update the last received packet
-                    player.playBlock(audioData); // Play the received audio block
-                    expectedSequenceNumber++; // Increment expected sequence number for next packet
-                } else {
-                    System.out.println("WARNING: Receiver: Received out-of-sequence packet, expected: " + expectedSequenceNumber + ", received: " + receivedSequenceNumber);
-                }
-            }
-        } catch (Exception e) {
-            System.out.println("ERROR: Receiver: Some error occurred!");
+            receiving_socket = new DatagramSocket3(PORT);
+        } catch (SocketException e){
+            System.out.println("ERROR: AudioReceiver: Could not open UDP socket to receive from.");
             e.printStackTrace();
-        } finally {
-            receiving_socket.close(); // Close the receiving socket on error or completion
+            System.exit(0);
         }
+        boolean running = true;
+//        byte[] buffer = new byte[512];
+//        DatagramPacket packet = new DatagramPacket(buffer, 0, buffer.length);
+        AudioPlayer player = new AudioPlayer();
+        int expectedSequenceNumber = 0;
+        byte [] sequence_number_byte = new byte[4];
+        byte [] audio_data = new byte[512];
+        Map<Integer, byte[]> buff =  new HashMap<>();
+
+        while (running){
+            try{
+                byte[] buffer = new byte[516];
+                DatagramPacket packet = new DatagramPacket(buffer, buffer.length);
+                receiving_socket.receive(packet);
+
+                ByteBuffer wrappedBuffer = ByteBuffer.wrap(packet.getData());
+                int receivedSequenceNumber;
+
+                System.arraycopy(packet.getData(),0,audio_data,0,audio_data.length);
+                System.arraycopy(packet.getData(),audio_data.length,sequence_number_byte,0,4);
+                receivedSequenceNumber = ByteBuffer.wrap(sequence_number_byte).getInt();
+
+                if (receivedSequenceNumber == expectedSequenceNumber) {
+                    System.out.printf("Packet received" + "\n");
+                    player.playBlock(audio_data);
+                    expectedSequenceNumber++;
+
+                    while (buff.containsKey(expectedSequenceNumber)){
+                        audio_data = buff.remove(expectedSequenceNumber);
+                        System.out.println("recieved packet with sequence number" + expectedSequenceNumber + "\n");
+                        player.playBlock(audio_data);
+                        expectedSequenceNumber++;
+                    }
+                } else {
+                    buff.put(receivedSequenceNumber,audio_data);
+                    System.out.printf("Packet stored in buff with sequence:  " + receivedSequenceNumber + "\n");
+                }
+                byte[] audioData = new byte[512];
+                wrappedBuffer.get(audioData);
+
+                player.playBlock(audioData);
+                expectedSequenceNumber = receivedSequenceNumber + 1;
+
+            } catch (Exception e){
+                System.out.println("ERROR: AudioReceiver: Some error occurred!" + "\n");
+                e.printStackTrace();
+            }
+        }
+        player.close();
+        receiving_socket.close();
     }
 }
+
+
